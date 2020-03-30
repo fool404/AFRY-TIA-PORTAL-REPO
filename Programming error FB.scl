@@ -26,6 +26,23 @@ VERSION : 1.0
 
 
 BEGIN
+	//=============================================================================
+	// Company: ÅF Pöyry AB  (c)Copyright (2020)
+	//-----------------------------------------------------------------------------
+	// Library:         N/A
+	// Tested with:     N/A
+	// Engineering:     TIA Portal V16
+	// Restrictions:    N/A
+	// Requirements:    OB121
+	// Functionality:   Hanterar Larm från OB121.
+	//                  Anropet skall ligga i OB121.
+	//                  Larmet skall ha en reset flagga direkt
+	//                  efter larm till panel sätts.
+	//-----------------------------------------------------------------------------
+	// Change log table:
+	// Version  Date        Author              Changes applied
+	// V0.1     30.03.2020  DRA                 First draft
+	
 	CASE #BlockType OF
 	    1:
 	        #"t-block type" := string#'OB';
