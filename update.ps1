@@ -14,7 +14,7 @@ if($text -ne '' ){
     for ($i = 1; $i -le 100; $i++ )
 {
     Write-Progress -Activity "Uppladdning" -Status "$i% Klar:" -PercentComplete $i;
-    time.sleep(1)
+    Start-Sleep -Seconds 1
 }
 if($i-eq 99){
     Write-Host('Uppladdning Klar')
