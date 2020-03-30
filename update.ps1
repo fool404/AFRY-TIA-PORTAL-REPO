@@ -13,9 +13,10 @@ if($text -ne '' ){
     
     for ($i = 1; $i -le 100; $i++ )
 {
-    Write-Progress -Activity "Uppladdning Pågår" -Status "$i% Complete:" -PercentComplete $i;
+    Write-Progress -Activity "Uppladdning" -Status "$i% Klar:" -PercentComplete $i;
+    time.sleep(1)
 }
-if($i-eq 100){
+if($i-eq 99){
     Write-Host('Uppladdning Klar')
 }
 }
