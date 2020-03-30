@@ -55,8 +55,5 @@ BEGIN
 	    #"o-message" := #"t-error message";
 	    #"io-error" := True;
 	END_IF;
-	
-	
-	
 END_FUNCTION_BLOCK
 
