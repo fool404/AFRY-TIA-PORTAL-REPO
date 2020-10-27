@@ -5,12 +5,11 @@ AUTHOR : Widelund
 VERSION : 1.0
    VAR_INPUT 
       "i-Data" : Variant;
-      "i-Typ" : String;
    END_VAR
 
    VAR_OUTPUT 
       "o-Data" : Variant;
-      "o-Count" : DInt;
+      "o-Count" : UDInt;
    END_VAR
 
    VAR_TEMP 
@@ -19,24 +18,16 @@ VERSION : 1.0
       "t-Pos" : DInt;
    END_VAR
 
-   VAR CONSTANT 
-      "c-Integer" : String := 'Int';
-      "c-Size_of_int" : Int := 2;
-   END_VAR
-
 
 BEGIN
-	
 	//Kopiera Variant IN till Variant UT
 	#"t-Pos" := 0;
 	#"t-Int" := Serialize(SRC_VARIABLE := #"i-Data", DEST_ARRAY => #"t-Data", POS := #"t-Pos");
 	//Utvärdera antal element i arrayen
-	IF (IS_ARRAY(#"i-Data") AND #"i-Typ" = #"c-Integer") THEN
-	    #"o-Count" := (#"t-Pos" / #"c-Size_of_int");
+	IF (IS_ARRAY(#"i-Data")) THEN
+	    #"o-Count" := CountOfElements(#"i-Data");
 	END_IF;
 	#"t-Pos" := 0;
 	#"t-Int" := Deserialize(SRC_ARRAY := #"t-Data", DEST_VARIABLE => #"o-Data", POS := #"t-Pos");
-	
-	
 END_FUNCTION
 
