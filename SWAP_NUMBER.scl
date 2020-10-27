@@ -1,0 +1,21 @@
+﻿FUNCTION "SWAP" : Void
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+   VAR_INPUT 
+      "i-swap" {InstructionName := 'R_TRIG'; LibVersion := '1.0'} : R_TRIG;
+   END_VAR
+
+   VAR_IN_OUT 
+      "io-a" : Int;
+      "io-b" : Int;
+   END_VAR
+
+
+BEGIN
+	IF #"i-swap".Q THEN
+	    #"io-a" := #"io-a" XOR #"io-b"; #"io-b" := #"io-b" XOR #"io-a"; #"io-a" := #"io-a" XOR #"io-b";
+	END_IF;
+	
+	
+END_FUNCTION
+
