@@ -1,0 +1,83 @@
+﻿TYPE "User_data_type_1"
+VERSION : 0.1
+   STRUCT
+      twobyte : Array[0..1] of Byte;
+   END_STRUCT;
+
+END_TYPE
+
+FUNCTION "FC Move Variant" : Void
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+   VAR_INPUT 
+      "i-Data" : Variant;
+   END_VAR
+
+   VAR_OUTPUT 
+      "o-Data" : Variant;
+   END_VAR
+
+   VAR_TEMP 
+      "t-Data" : Array[0..2048] of Byte;
+      "t-Int" : Int;
+      "t-Pos" : DInt;
+   END_VAR
+
+
+BEGIN
+	
+	//Kopiera Variant IN till Variant UT
+	#"t-Pos" :=0;
+	#"t-Int" := Serialize(SRC_VARIABLE:=#"i-Data", DEST_ARRAY=>#"t-Data", POS:=#"t-Pos");
+	#"t-Pos" := 0;
+	#"t-Int" := Deserialize(SRC_ARRAY:=#"t-Data", DEST_VARIABLE=>#"o-Data", POS:=#"t-Pos");
+END_FUNCTION
+
+FUNCTION_BLOCK "SWAP_STRUCT"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+   VAR_INPUT 
+      "i-swap" : Bool;
+   END_VAR
+
+   VAR_IN_OUT 
+      "io-struct1" : Variant;
+      "io-struct2" : Variant;
+   END_VAR
+
+   VAR 
+      "s-R_TRIG" {InstructionName := 'R_TRIG'; LibVersion := '1.0'} : R_TRIG;
+   END_VAR
+
+   VAR_TEMP 
+      "t-struct1" : "User_data_type_1";
+      "t-struct2" : "User_data_type_1";
+      "t-temp" : "User_data_type_1";
+   END_VAR
+
+
+BEGIN
+	#"s-R_TRIG"(CLK := #"i-swap");
+	
+	IF #"s-R_TRIG".Q THEN
+	    //read struct1
+	    "FC Move Variant"("i-Data":=#"io-struct1",
+	                      "o-Data"=>#"t-struct1");
+	    //read struct2
+	    "FC Move Variant"("i-Data" := #"io-struct2",
+	                      "o-Data" => #"t-struct2");
+	    
+	    //swap struct1 and struct2
+	    #"t-temp" := #"t-struct1";
+	    #"t-struct1" := #"t-struct2";
+	    #"t-struct2" := #"t-temp";
+	    
+	    //write struct1
+	    "FC Move Variant"("i-Data":=#"t-struct1",
+	                      "o-Data"=>#"io-struct1");
+	    //write struct2
+	    "FC Move Variant"("i-Data":=#"t-struct2",
+	                      "o-Data"=>#"io-struct2");
+	END_IF;
+END_FUNCTION_BLOCK
+
