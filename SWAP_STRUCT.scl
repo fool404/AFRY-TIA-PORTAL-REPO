@@ -1,9 +1,8 @@
 ﻿TYPE "User_data_type_1"
 VERSION : 0.1
    STRUCT
-      twobyte : Array[0..1] of Byte;
+      byte : Array[0..1] of Byte;
    END_STRUCT;
-
 END_TYPE
 
 FUNCTION "FC Move Variant" : Void
@@ -25,7 +24,6 @@ VERSION : 0.1
 
 
 BEGIN
-	
 	//Kopiera Variant IN till Variant UT
 	#"t-Pos" :=0;
 	#"t-Int" := Serialize(SRC_VARIABLE:=#"i-Data", DEST_ARRAY=>#"t-Data", POS:=#"t-Pos");
