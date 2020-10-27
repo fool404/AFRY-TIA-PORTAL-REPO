@@ -1,19 +1,23 @@
 ﻿TYPE "User_data_type_1"
 VERSION : 0.1
    STRUCT
-      byte : Array[0..1] of Byte;
+      twobyte : Array[0..1] of Byte;
    END_STRUCT;
+
 END_TYPE
 
 FUNCTION "FC Move Variant" : Void
+TITLE = FC Move Variant
 { S7_Optimized_Access := 'FALSE' }
-VERSION : 0.1
+AUTHOR : Widelund
+VERSION : 1.0
    VAR_INPUT 
       "i-Data" : Variant;
    END_VAR
 
    VAR_OUTPUT 
       "o-Data" : Variant;
+      "o-Count" : UDInt;
    END_VAR
 
    VAR_TEMP 
@@ -25,10 +29,14 @@ VERSION : 0.1
 
 BEGIN
 	//Kopiera Variant IN till Variant UT
-	#"t-Pos" :=0;
-	#"t-Int" := Serialize(SRC_VARIABLE:=#"i-Data", DEST_ARRAY=>#"t-Data", POS:=#"t-Pos");
 	#"t-Pos" := 0;
-	#"t-Int" := Deserialize(SRC_ARRAY:=#"t-Data", DEST_VARIABLE=>#"o-Data", POS:=#"t-Pos");
+	#"t-Int" := Serialize(SRC_VARIABLE := #"i-Data", DEST_ARRAY => #"t-Data", POS := #"t-Pos");
+	//Utvärdera antal element i arrayen
+	IF (IS_ARRAY(#"i-Data")) THEN
+	    #"o-Count" := CountOfElements(#"i-Data");
+	END_IF;
+	#"t-Pos" := 0;
+	#"t-Int" := Deserialize(SRC_ARRAY := #"t-Data", DEST_VARIABLE => #"o-Data", POS := #"t-Pos");
 END_FUNCTION
 
 FUNCTION_BLOCK "SWAP_STRUCT"
@@ -38,9 +46,14 @@ VERSION : 0.1
       "i-swap" : Bool;
    END_VAR
 
+   VAR_OUTPUT 
+      "o-countOfElements0" : UDInt;
+      "o-countOfElements1" : UDInt;
+   END_VAR
+
    VAR_IN_OUT 
+      "io-struct0" : Variant;
       "io-struct1" : Variant;
-      "io-struct2" : Variant;
    END_VAR
 
    VAR 
@@ -48,9 +61,8 @@ VERSION : 0.1
    END_VAR
 
    VAR_TEMP 
-      "t-struct1" : "User_data_type_1";
-      "t-struct2" : "User_data_type_1";
-      "t-temp" : "User_data_type_1";
+      "t-struct" : Array[0..2] of "User_data_type_1";
+      "t-countOfElements" : Array[0..1] of UDInt;
    END_VAR
 
 
@@ -58,24 +70,40 @@ BEGIN
 	#"s-R_TRIG"(CLK := #"i-swap");
 	
 	IF #"s-R_TRIG".Q THEN
-	    //read struct1
-	    "FC Move Variant"("i-Data":=#"io-struct1",
-	                      "o-Data"=>#"t-struct1");
-	    //read struct2
-	    "FC Move Variant"("i-Data" := #"io-struct2",
-	                      "o-Data" => #"t-struct2");
 	    
-	    //swap struct1 and struct2
-	    #"t-temp" := #"t-struct1";
-	    #"t-struct1" := #"t-struct2";
-	    #"t-struct2" := #"t-temp";
+	    REGION read 
+	    "FC Move Variant"("i-Data" := #"io-struct0",
+	                      "o-Data" => #"t-struct"[0],
+	                      "o-Count" => #"t-countOfElements"[0]);
 	    
-	    //write struct1
-	    "FC Move Variant"("i-Data":=#"t-struct1",
-	                      "o-Data"=>#"io-struct1");
-	    //write struct2
-	    "FC Move Variant"("i-Data":=#"t-struct2",
-	                      "o-Data"=>#"io-struct2");
+	    "FC Move Variant"("i-Data" := #"io-struct1",
+	                      "o-Data" => #"t-struct"[1],
+	                      "o-Count" => #"t-countOfElements"[1]);
+	    END_REGION
+	
+	    REGION swap
+	    //swap struct0 and struct1
+	    //struct2 is a temp placeholder
+	    #"t-struct"[2] := #"t-struct"[0];
+	    #"t-struct"[0] := #"t-struct"[1];
+	    #"t-struct"[1] := #"t-struct"[2];
+	    END_REGION
+	
+	    REGION write
+	    "FC Move Variant"("i-Data" := #"t-struct"[0],
+	                      "o-Data" => #"io-struct0",
+	                      "o-Count" => #"t-countOfElements"[0]);
+	    
+	    "FC Move Variant"("i-Data" := #"t-struct"[1],
+	                      "o-Data" => #"io-struct1",
+	                      "o-Count" => #"t-countOfElements"[1]);
+	    END_REGION
+	
+	    REGION countOfElements
+	        #"o-countOfElements0" := #"t-countOfElements"[0];
+	        #"o-countOfElements1" := #"t-countOfElements"[1];
+	    END_REGION ;
+	    
 	END_IF;
 END_FUNCTION_BLOCK
 
